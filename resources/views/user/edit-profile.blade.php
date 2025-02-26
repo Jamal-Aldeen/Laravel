@@ -12,28 +12,46 @@
                     </div>
                     @error('name')
                         <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                    @enderror
+
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
                         <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ $user->email }}" >
                     </div>
                     @error('email')
                         <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                    @enderror
+
                     <div class="mb-3">
                         <label for="phone_number" class="form-label">Phone Number</label>
                         <input type="text" name="phone_number" id="phone_number" class="form-control @error('phone_number') is-invalid @enderror" value="{{ $user->phone_number }}" >
                     </div>
                     @error('phone_number')
                         <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                    @enderror
+
                     <div class="mb-3">
                         <label for="address" class="form-label">Address</label>
                         <input type="text" name="address" id="address" class="form-control @error('address') is-invalid @enderror" value="{{ $user->address }}" >
                     </div>
                     @error('address')
                         <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+
+                    <!-- Optional Password Update Fields -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label">New Password (optional)</label>
+                        <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror">
+                        @error('password')
+                            <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password_confirmation" class="form-label">Confirm New Password</label>
+                        <input type="password" name="password_confirmation" id="password_confirmation" class="form-control">
+                    </div>
+
                     <button type="submit" class="btn btn-primary">Update Profile</button>
                     <a href="{{ route('users.show', $user) }}" class="btn btn-secondary">Cancel</a>
                 </form>

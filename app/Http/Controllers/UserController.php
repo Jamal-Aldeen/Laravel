@@ -29,8 +29,8 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-         // Validate the request data
-         $request->validate([
+        // Validate the request data
+        $request->validate([
             'name' => 'required|string|max:200|min:5',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'phone_number' => [
@@ -40,16 +40,25 @@ class UserController extends Controller
                 'regex:/^(010|011|012|015)\d{8}$/'
             ],
             'address' => 'required|string|max:200|min:5',
+            'password' => 'nullable|min:8|confirmed', // Password is optional
         ]);
-
-        // Update the user's profile
-        $user->update([
+    
+        // Prepare the data to update
+        $updateData = [
             'name' => $request->name,
             'email' => $request->email,
             'phone_number' => $request->phone_number,
             'address' => $request->address,
-        ]);
-
+        ];
+    
+        // Update the password if provided
+        if ($request->filled('password')) {
+            $updateData['password'] = bcrypt($request->password);
+        }
+    
+        // Update the user's profile
+        $user->update($updateData);
+    
         // Redirect back to the profile page with a success message
         return redirect()->route('users.show', $user->id)->with('success', 'Profile updated successfully!');
     }
