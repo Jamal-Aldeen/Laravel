@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -79,24 +80,71 @@ class ProductController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Product $product)
     {
-        //
+        $categories = Category::all();
+        return view('admin.products.edit', compact('product', 'categories'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Product $product)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|min:10|max:255|regex:/^[A-Za-z0-9\s]+$/|unique:products,name,' . $product->id,
+            'description' => 'nullable|string|min:10|max:255',
+            'price' => 'required|numeric',
+            'stock' => 'required|integer',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+            'categories' => 'required|array'
+        ]);
+    
+        $productData = $request->except(['image', 'categories']);
+    
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $extension = $request->image->getClientOriginalExtension();
+            $imageName = time() . '.' . $extension;
+            try {
+                $imagePath = $request->image->storeAs('product_images', $imageName, 'public');
+                $productData['image'] = 'storage/' . $imagePath;
+    
+                // Delete old image
+                if ($product->image) {
+                    $oldImagePath = str_replace('storage/', '', $product->image);
+                    Storage::disk('public')->delete($oldImagePath);
+                }
+            } catch (\Exception $e) {
+                return back()->with('error', 'Image upload failed');
+            }
+        }
+    
+        // Update slug if name changes
+        if ($productData['name'] != $product->name) {
+            $productData['slug'] = strtolower(str_replace(' ', '-', $request->name));
+        }
+    
+        $product->update($productData);
+    
+        // Sync categories
+        $product->categories()->sync($request->categories);
+    
+        return redirect()->route('admin.products.index')->with('success', 'Product updated successfully');
     }
-
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Product $product)
     {
-        //
+        // Delete product image
+        if ($product->image) {
+            $oldImagePath = str_replace('storage/', '', $product->image);
+            Storage::disk('public')->delete($oldImagePath);
+        }
+    
+        $product->delete();
+    
+        return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully');
     }
 }

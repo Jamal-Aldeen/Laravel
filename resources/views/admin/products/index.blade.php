@@ -42,10 +42,8 @@
                                 @endforeach
                             </td>
                             <td>
-                                <a href="#" class="btn btn-sm btn-warning">✏
-                                    Edit</a>
-                                <form action="#" method="POST"
-                                      class="d-inline delete-form">
+                                <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-sm btn-warning">✏ Edit</a>
+                                <form action="{{ route('admin.products.destroy', $product) }}" method="POST" class="d-inline delete-form">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-danger">🗑 Delete</button>
